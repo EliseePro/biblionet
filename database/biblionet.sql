@@ -1,5 +1,5 @@
-SET NAMES utf8mb4;
-SET FOREIGN_KEY_CHECKS = 0;
+CREATE DATABASE bibliotheque;
+use DATABASE bibliotheque;
 
 DROP TABLE IF EXISTS emprunts;
 DROP TABLE IF EXISTS adherents;
