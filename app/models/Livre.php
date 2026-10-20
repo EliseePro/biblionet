@@ -1,12 +1,23 @@
 <?php
 
+if (!function_exists('connexion')) {
+    require_once __DIR__ . '/../../config/config.php';
+}
+
 class Livre
 {
     private const DISPONIBLES_SQL = '(l.nb_exemplaires - (SELECT COUNT(*) FROM emprunts e WHERE e.livre_id = l.id AND e.date_retour IS NULL))';
 
+    private static ?PDO $bdd = null;
+
     private static function db(): PDO
     {
-        return Database::getConnection();
+        if (self::$bdd === null) {
+            self::$bdd = connexion();
+            self::$bdd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            self::$bdd->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+        }
+        return self::$bdd;
     }
 
     public static function all(): array
@@ -14,7 +25,7 @@ class Livre
         $sql = 'SELECT l.*, ' . self::DISPONIBLES_SQL . ' AS disponibles
                 FROM livres l
                 ORDER BY l.titre';
-        return self::db()->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+        return self::db()->query($sql)->fetchAll();
     }
 
     public static function search(string $terme): array
@@ -26,7 +37,7 @@ class Livre
         $stmt = self::db()->prepare($sql);
         $like = '%' . $terme . '%';
         $stmt->execute([':titre' => $like, ':auteur' => $like]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll();
     }
 
     public static function find(int $id): ?array
@@ -36,7 +47,7 @@ class Livre
                 WHERE l.id = :id';
         $stmt = self::db()->prepare($sql);
         $stmt->execute([':id' => $id]);
-        $livre = $stmt->fetch(PDO::FETCH_ASSOC);
+        $livre = $stmt->fetch();
         return $livre ?: null;
     }
 
