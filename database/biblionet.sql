@@ -1,5 +1,5 @@
 CREATE DATABASE bibliotheque;
-use DATABASE bibliotheque;
+USE bibliotheque;
 
 DROP TABLE IF EXISTS emprunts;
 DROP TABLE IF EXISTS adherents;
