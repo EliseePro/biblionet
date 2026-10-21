@@ -1,94 +1,58 @@
 <?php
 
-if (!function_exists('connexion')) {
-    require_once __DIR__ . '/../../config/config.php';
-}
+require_once __DIR__ . '/../../config/config.php';
 
 class Livre
 {
-    private const DISPONIBLES_SQL = '(l.nb_exemplaires - (SELECT COUNT(*) FROM emprunts e WHERE e.livre_id = l.id AND e.date_retour IS NULL))';
 
-    private static ?PDO $bdd = null;
+    private const DISPONIBLES = '(l.nb_exemplaires - (SELECT COUNT(*) FROM emprunts e WHERE e.livre_id = l.id AND e.date_retour IS NULL))';
 
-    private static function db(): PDO
+  
+    private static function requete(string $sql, array $params = []): PDOStatement
     {
-        if (self::$bdd === null) {
-            self::$bdd = connexion();
-            self::$bdd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            self::$bdd->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-        }
-        return self::$bdd;
+        $stmt = connexion()->prepare($sql);
+        $stmt->execute($params);
+        return $stmt;
     }
 
     public static function all(): array
     {
-        $sql = 'SELECT l.*, ' . self::DISPONIBLES_SQL . ' AS disponibles
-                FROM livres l
-                ORDER BY l.titre';
-        return self::db()->query($sql)->fetchAll();
+        $sql = 'SELECT l.*, ' . self::DISPONIBLES . ' AS disponibles FROM livres l ORDER BY l.titre';
+        return self::requete($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public static function search(string $terme): array
     {
-        $sql = 'SELECT l.*, ' . self::DISPONIBLES_SQL . ' AS disponibles
-                FROM livres l
-                WHERE l.titre LIKE :titre OR l.auteur LIKE :auteur
-                ORDER BY l.titre';
-        $stmt = self::db()->prepare($sql);
+        $sql = 'SELECT l.*, ' . self::DISPONIBLES . ' AS disponibles FROM livres l
+                WHERE l.titre LIKE ? OR l.auteur LIKE ? ORDER BY l.titre';
         $like = '%' . $terme . '%';
-        $stmt->execute([':titre' => $like, ':auteur' => $like]);
-        return $stmt->fetchAll();
+        return self::requete($sql, [$like, $like])->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public static function find(int $id): ?array
     {
-        $sql = 'SELECT l.*, ' . self::DISPONIBLES_SQL . ' AS disponibles
-                FROM livres l
-                WHERE l.id = :id';
-        $stmt = self::db()->prepare($sql);
-        $stmt->execute([':id' => $id]);
-        $livre = $stmt->fetch();
-        return $livre ?: null;
+        $sql = 'SELECT l.*, ' . self::DISPONIBLES . ' AS disponibles FROM livres l WHERE l.id = ?';
+        return self::requete($sql, [$id])->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
-    public static function create(array $data): int
+    public static function create(array $d): bool
     {
-        $sql = 'INSERT INTO livres (titre, auteur, categorie, annee, nb_exemplaires)
-                VALUES (:titre, :auteur, :categorie, :annee, :nb_exemplaires)';
-        $stmt = self::db()->prepare($sql);
-        $stmt->execute([
-            ':titre'          => $data['titre'],
-            ':auteur'         => $data['auteur'],
-            ':categorie'      => $data['categorie'],
-            ':annee'          => (int) $data['annee'],
-            ':nb_exemplaires' => (int) $data['nb_exemplaires'],
-        ]);
-        return (int) self::db()->lastInsertId();
+        $sql = 'INSERT INTO livres (titre, auteur, categorie, annee, nb_exemplaires) VALUES (?, ?, ?, ?, ?)';
+        return self::requete($sql, [$d['titre'], $d['auteur'], $d['categorie'], (int) $d['annee'], (int) $d['nb_exemplaires']])->rowCount() > 0;
     }
 
-    public static function update(int $id, array $data): bool
+    public static function update(int $id, array $d): bool
     {
-        $sql = 'UPDATE livres
-                SET titre = :titre, auteur = :auteur, categorie = :categorie,
-                    annee = :annee, nb_exemplaires = :nb_exemplaires
-                WHERE id = :id';
-        $stmt = self::db()->prepare($sql);
-        return $stmt->execute([
-            ':titre'          => $data['titre'],
-            ':auteur'         => $data['auteur'],
-            ':categorie'      => $data['categorie'],
-            ':annee'          => (int) $data['annee'],
-            ':nb_exemplaires' => (int) $data['nb_exemplaires'],
-            ':id'             => $id,
-        ]);
+        $sql = 'UPDATE livres SET titre = ?, auteur = ?, categorie = ?, annee = ?, nb_exemplaires = ? WHERE id = ?';
+        self::requete($sql, [$d['titre'], $d['auteur'], $d['categorie'], (int) $d['annee'], (int) $d['nb_exemplaires'], $id]);
+        return true;
     }
 
+   
     public static function delete(int $id): bool
     {
         try {
-            $stmt = self::db()->prepare('DELETE FROM livres WHERE id = :id');
-            $stmt->execute([':id' => $id]);
-            return $stmt->rowCount() > 0;
+            return self::requete('DELETE FROM livres WHERE id = ?', [$id])->rowCount() > 0;
         } catch (PDOException $e) {
             return false;
         }
