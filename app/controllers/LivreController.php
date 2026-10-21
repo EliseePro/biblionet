@@ -4,7 +4,7 @@ require_once __DIR__ . '/../models/Livre.php';
 
 class LivreController
 {
-    private const AUTH_ACTIVE = false; // passer à true quand l'authentification de Membre 1 est prête
+    private const AUTH_ACTIVE = true;
 
     public function __construct()
     {
@@ -16,19 +16,16 @@ class LivreController
         }
     }
 
-    // Liste des livres
     public function index(): void
     {
         $this->render('livres/index', ['livres' => Livre::all()]);
     }
 
-    // Formulaire d'ajout (vide)
     public function create(): void
     {
         $this->render('livres/form', ['livre' => null, 'old' => [], 'errors' => []]);
     }
 
-    // Formulaire de modification (pré-rempli)
     public function edit($id): void
     {
         $livre = Livre::find((int) $id);
@@ -60,7 +57,6 @@ class LivreController
         $this->redirect('/livres');
     }
 
-    // Ajoute (id = null) ou modifie (id = numéro) un livre
     private function enregistrer(?int $id): void
     {
         $livre = $id ? Livre::find($id) : null;
@@ -90,7 +86,6 @@ class LivreController
         $this->redirect('/livres');
     }
 
-    // Retourne un tableau d'erreurs (vide si tout est correct)
     private function valider(array $d): array
     {
         $errors = [];
@@ -108,7 +103,6 @@ class LivreController
         return $errors;
     }
 
-    // Affiche une vue en lui passant les données
     private function render(string $vue, array $data = []): void
     {
         extract($data);

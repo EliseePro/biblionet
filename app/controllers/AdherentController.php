@@ -5,10 +5,16 @@ require_once __DIR__ . '/../models/Emprunt.php';
 
 class AdherentController
 {
+    private const AUTH_ACTIVE = true;
+
     public function __construct()
     {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
+        }
+        if (self::AUTH_ACTIVE && empty($_SESSION['user_id'])) {
+            header('Location: /login');
+            exit;
         }
     }
 

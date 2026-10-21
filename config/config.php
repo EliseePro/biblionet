@@ -1,5 +1,42 @@
 <?php
 
+
+function loadEnv(string $path): void
+{
+    if (!is_file($path)) {
+        return;
+    }
+    $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if ($lines === false) {
+        return;
+    }
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if ($line === '' || str_starts_with($line, '#')) {
+            continue;
+        }
+        if (!str_contains($line, '=')) {
+            continue;
+        }
+        [$name, $value] = explode('=', $line, 2);
+        $name  = trim($name);
+        $value = trim($value);
+        if (
+            (str_starts_with($value, '"') && str_ends_with($value, '"')) ||
+            (str_starts_with($value, "'") && str_ends_with($value, "'"))
+        ) {
+            $value = substr($value, 1, -1);
+        }
+        if ($name !== '' && getenv($name) === false) {
+            putenv("{$name}={$value}");
+            $_ENV[$name] = $value;
+        }
+    }
+}
+
+$envPath = dirname(__DIR__) . '/.env';
+loadEnv($envPath);
+
 function connexion(): PDO
 {
     static $bdd = null;
@@ -7,24 +44,24 @@ function connexion(): PDO
         return $bdd;
     }
 
-    $host = getenv('DB_HOST');
+    $host     = getenv('DB_HOST');
     $database = getenv('DB_NAME');
-    $user = getenv('DB_USER');
+    $user     = getenv('DB_USER');
     $password = getenv('DB_PASS');
 
-    $host = $host === false || $host === '' ? 'localhost' : $host;
-    $database = $database === false || $database === '' ? 'bibliotheque' : $database;
-    $user = $user === false || $user === '' ? 'root' : $user;
-    $password = $password === false ? '' : $password;
+    $host     = ($host === false || $host === '') ? 'localhost' : $host;
+    $database = ($database === false || $database === '') ? 'bibliotheque' : $database;
+    $user     = ($user === false || $user === '') ? 'root' : $user;
+    $password = ($password === false) ? '' : $password;
 
     $bdd = new PDO(
         "mysql:host={$host};dbname={$database};charset=utf8mb4",
         $user,
         $password,
         [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false,
+            PDO::ATTR_EMULATE_PREPARES   => false,
         ]
     );
     return $bdd;

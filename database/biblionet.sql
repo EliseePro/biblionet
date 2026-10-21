@@ -60,7 +60,7 @@ CREATE TABLE emprunts (
 --   mot de passe : admin123   (à changer en production)
 INSERT INTO users (nom, email, password) VALUES
 ('Bibliothécaire', 'admin@biblionet.local',
-'admin123');
+ '$2y$10$Pe0Jj9aaGu6dWicKSTwi0OvmVSGLSxLJfRLCHLn7g5xReboq02Ta.');
 
 INSERT INTO livres (titre, auteur, categorie, annee, nb_exemplaires) VALUES
 ('Le Petit Prince',                    'Antoine de Saint-Exupéry', 'Roman',        1943, 3),

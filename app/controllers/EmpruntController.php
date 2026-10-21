@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?php
 
 require_once __DIR__ . '/../models/Emprunt.php';
@@ -168,3 +169,166 @@ class EmpruntController
         $this->redirect('/emprunts');
     }
 }
+=======
+<?php
+
+require_once __DIR__ . '/../models/Emprunt.php';
+require_once __DIR__ . '/../models/Livre.php';
+require_once __DIR__ . '/../models/Adherent.php';
+
+class EmpruntController
+{
+    private const AUTH_ACTIVE = true; // passer à true quand l'auth est prête
+
+    public function __construct()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        if (self::AUTH_ACTIVE && empty($_SESSION['user_id'])) {
+            $this->redirect('/login');
+        }
+    }
+
+    private function redirect(string $path): void
+    {
+        header('Location: ' . $path);
+        exit;
+    }
+
+    private function render(string $view, array $data = []): void
+    {
+        extract($data);
+        $flash = $_SESSION['flash'] ?? null;
+        unset($_SESSION['flash']);
+        require __DIR__ . '/../views/' . $view . '.php';
+    }
+
+    private function message(string $type, string $text): void
+    {
+        $_SESSION['flash'] = ['type' => $type, 'message' => $text];
+    }
+
+    public function index(): void
+    {
+        $this->render('emprunts/index', [
+            'emprunts' => Emprunt::tous(),
+        ]);
+    }
+
+    public function create(): void
+    {
+        $this->render('emprunts/form', [
+            'emprunt'   => null,
+            'old'       => [],
+            'errors'    => [],
+            'livres'    => Livre::all(),
+            'adherents' => Adherent::tous(),
+        ]);
+    }
+
+    public function edit($id): void
+    {
+        $emprunt = Emprunt::trouver((int) $id);
+        if (!$emprunt) {
+            $this->message('danger', 'Emprunt introuvable.');
+            $this->redirect('/emprunts');
+        }
+        $this->render('emprunts/form', [
+            'emprunt'   => $emprunt,
+            'old'       => $emprunt,
+            'errors'    => [],
+            'livres'    => Livre::all(),
+            'adherents' => Adherent::tous(),
+        ]);
+    }
+
+    public function store(): void
+    {
+        $this->enregistrer(null);
+    }
+
+    public function update($id): void
+    {
+        $this->enregistrer((int) $id);
+    }
+
+    private function enregistrer(?int $id): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->message('danger', 'Requête invalide.');
+            $this->redirect('/emprunts');
+        }
+
+        $data = [
+            'livre_id'      => (int) ($_POST['livre_id'] ?? 0),
+            'adherent_id'   => (int) ($_POST['adherent_id'] ?? 0),
+            'date_emprunt'  => trim((string) ($_POST['date_emprunt'] ?? date('Y-m-d'))),
+            'date_retour'   => trim((string) ($_POST['date_retour'] ?? '')) ?: null,
+        ];
+
+        $errors = [];
+        if ($data['livre_id'] <= 0) {
+            $errors['livre_id'] = 'Choisissez un livre.';
+        }
+        if ($data['adherent_id'] <= 0) {
+            $errors['adherent_id'] = 'Choisissez un adhérent.';
+        }
+        if ($data['date_emprunt'] === '') {
+            $errors['date_emprunt'] = 'Date d\'emprunt obligatoire.';
+        }
+
+        if ($id === null && $data['livre_id'] > 0 && !Livre::estDisponible($data['livre_id'])) {
+            $errors['livre_id'] = 'Ce livre n\'a plus d\'exemplaire disponible.';
+        }
+
+        $emprunt = $id ? Emprunt::trouver($id) : null;
+        if ($id && !$emprunt) {
+            $this->message('danger', 'Emprunt introuvable.');
+            $this->redirect('/emprunts');
+        }
+
+        if ($errors !== []) {
+            $this->render('emprunts/form', [
+                'emprunt'   => $emprunt,
+                'old'       => $data,
+                'errors'    => $errors,
+                'livres'    => Livre::all(),
+                'adherents' => Adherent::tous(),
+            ]);
+            return;
+        }
+
+        if ($id) {
+            Emprunt::modifier($id, $data);
+            $this->message('success', 'Emprunt modifié.');
+        } else {
+            Emprunt::creer($data);
+            $this->message('success', 'Emprunt enregistré.');
+        }
+        $this->redirect('/emprunts');
+    }
+
+    public function supprimer($id): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && Emprunt::supprimer((int) $id)) {
+            $this->message('success', 'Emprunt supprimé.');
+        } else {
+            $this->message('danger', 'Suppression impossible.');
+        }
+        $this->redirect('/emprunts');
+    }
+
+    public function marquerCommeRetourne($id): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (Emprunt::marquerCommeRetourne((int) $id)) {
+                $this->message('success', 'Retour enregistré.');
+            } else {
+                $this->message('danger', 'Erreur lors de l\'enregistrement du retour.');
+            }
+        }
+        $this->redirect('/emprunts');
+    }
+}
+>>>>>>> affb9a9 (j'ai fait des motifs un peu partout 🙌)
