@@ -1,55 +1,50 @@
 <?php
 
 require_once __DIR__ . '/../models/Adherent.php';
+require_once __DIR__ . '/../models/Emprunt.php';
 
 class AdherentController
 {
-    private const AUTH_ACTIVE = false; // passer à true quand l'authentification de Membre 1 est prête
-
     public function __construct()
     {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        if (self::AUTH_ACTIVE && empty($_SESSION['user_id'])) {
-            $this->redirect('/login');
-        }
     }
 
     private function redirect(string $path): void
     {
-        header('Location: ' . $path);
+        header('Location: ' . (function_exists('app_url') ? app_url($path) : $path));
         exit;
     }
 
     private function render(string $view, array $data = []): void
     {
+        $flash = $_SESSION['flash'] ?? null;
+        unset($_SESSION['flash']);
         extract($data);
         require __DIR__ . '/../views/' . $view . '.php';
     }
 
     private function message(string $type, string $text): void
     {
-        $_SESSION['flash_message'] = ['type' => $type, 'text' => $text];
+        $_SESSION['flash'] = ['type' => $type, 'message' => $text];
     }
 
-    // Liste des adhérents
     public function index(): void
     {
         $this->render('adherents/index', ['adherents' => Adherent::tous()]);
     }
 
-    // Formulaire d'ajout (vide)
     public function create(): void
     {
         $this->render('adherents/form', ['adherent' => null, 'old' => [], 'errors' => []]);
     }
 
-    // Formulaire de modification (pré-rempli)
     public function edit($id): void
     {
         $adherent = Adherent::trouver((int) $id);
-        if (!$adherent) {
+        if ($adherent === null) {
             $this->message('danger', 'Adhérent introuvable.');
             $this->redirect('/adherents');
         }
@@ -58,56 +53,61 @@ class AdherentController
 
     public function enregistrer(?int $id = null): void
     {
-        $data = [
-            'nom' => $_POST['nom'] ?? '',
-            'prenom' => $_POST['prenom'] ?? '',
-            'classe' => $_POST['classe'] ?? '',
-            'telephone' => $_POST['telephone'] ?? '',
-        ];
-
-        // Validation simple
-        $errors = [];
-        foreach ($data as $key => $value) {
-            if (empty($value)) {
-                $errors[$key] = ucfirst($key) . ' est requis.';
-            }
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->message('danger', 'Requête invalide.');
+            $this->redirect('/adherents');
         }
 
-        if (!empty($errors)) {
-            $this->render('adherents/form', ['adherent' => null, 'old' => $data, 'errors' => $errors]);
+        $data = [];
+        foreach (['nom', 'prenom', 'classe', 'telephone'] as $field) {
+            $data[$field] = trim((string) ($_POST[$field] ?? ''));
+        }
+
+        $errors = [];
+        foreach (['nom', 'prenom', 'classe'] as $field) {
+            if ($data[$field] === '') {
+                $errors[$field] = 'Ce champ est obligatoire.';
+            }
+        }
+        if ($this->longueur($data['nom']) > 100) {
+            $errors['nom'] = 'Le nom ne peut pas dépasser 100 caractères.';
+        }
+        if ($this->longueur($data['prenom']) > 100) {
+            $errors['prenom'] = 'Le prénom ne peut pas dépasser 100 caractères.';
+        }
+        if ($this->longueur($data['classe']) > 50) {
+            $errors['classe'] = 'La classe ne peut pas dépasser 50 caractères.';
+        }
+        if ($this->longueur($data['telephone']) > 30) {
+            $errors['telephone'] = 'Le téléphone ne peut pas dépasser 30 caractères.';
+        }
+
+        $adherent = $id === null ? null : Adherent::trouver($id);
+        if ($id !== null && $adherent === null) {
+            $this->message('danger', 'Adhérent introuvable.');
+            $this->redirect('/adherents');
+        }
+        if ($errors !== []) {
+            $this->render('adherents/form', [
+                'adherent' => $adherent,
+                'old' => $data,
+                'errors' => $errors,
+            ]);
             return;
         }
 
-        if ($id === null) {
-            // Création
-            if (Adherent::creer($data)) {
-                $this->message('success', 'Adhérent créé.');
-                $this->redirect('/adherents');
-            } else {
-                $this->message('danger', 'Erreur lors de la création.');
-                $this->render('adherents/form', ['adherent' => null, 'old' => $data, 'errors' => []]);
-            }
-        } else {
-            // Modification
-            if (Adherent::modifier($id, $data)) {
-                $this->message('success', 'Adhérent modifié.');
-                $this->redirect('/adherents');
-            } else {
-                $this->message('danger', 'Erreur lors de la modification.');
-                $this->render('adherents/form', ['adherent' => Adherent::trouver($id), 'old' => $data, 'errors' => []]);
-            }
+        $saved = $id === null ? Adherent::creer($data) : Adherent::modifier($id, $data);
+        if (!$saved) {
+            $this->message('danger', 'Enregistrement impossible. Vérifiez les données et réessayez.');
+            $this->render('adherents/form', [
+                'adherent' => $adherent,
+                'old' => $data,
+                'errors' => [],
+            ]);
+            return;
         }
-    }
 
-    public function supprimer($id): void
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            if (Adherent::supprimer((int) $id)) {
-                $this->message('success', 'Adhérent supprimé.');
-            } else {
-                $this->message('danger', 'Suppression impossible : cet adhérent a des emprunts.');
-            }
-        }
+        $this->message('success', $id === null ? 'Adhérent créé.' : 'Adhérent modifié.');
         $this->redirect('/adherents');
     }
 
@@ -121,14 +121,40 @@ class AdherentController
         $this->enregistrer((int) $id);
     }
 
+    public function supprimer($id): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->message('danger', 'Requête invalide.');
+        } elseif (Adherent::supprimer((int) $id)) {
+            $this->message('success', 'Adhérent supprimé.');
+        } else {
+            $this->message('danger', 'Suppression impossible : cet adhérent est introuvable ou possède des emprunts.');
+        }
+        $this->redirect('/adherents');
+    }
+
+    public function delete($id): void
+    {
+        $this->supprimer($id);
+    }
+
     public function recherche($id): void
     {
         $adherent = Adherent::trouver((int) $id);
-        if (!$adherent) {
+        if ($adherent === null) {
             $this->message('danger', 'Adhérent introuvable.');
             $this->redirect('/adherents');
         }
-        $emprunts = Emprunt::empruntsParAdherent((int) $id);
-        $this->render('adherents/show', ['adherent' => $adherent, 'emprunts' => $emprunts]);
+        $this->render('adherents/show', [
+            'adherent' => $adherent,
+            'emprunts' => Emprunt::empruntsParAdherent((int) $id),
+        ]);
     }
- }
+
+    private function longueur(string $texte): int
+    {
+        return preg_match_all('/./us', $texte, $caracteres) === false
+            ? PHP_INT_MAX
+            : count($caracteres[0]);
+    }
+}
