@@ -11,7 +11,12 @@ class Emprunt
         return $stmt;
     }
 
-    private static function selectEmprunts(string $condition = '', array $params = []): array
+    private static function selectEmprunts(
+        string $condition = '',
+        array $params = [],
+        ?int $limite = null,
+        int $offset = 0
+    ): array
     {
         $sql = 'SELECT e.*, a.nom AS adherent_nom, a.prenom AS adherent_prenom,
                        a.classe AS adherent_classe, a.telephone AS adherent_telephone,
@@ -23,12 +28,37 @@ class Emprunt
             $sql .= ' WHERE ' . $condition;
         }
         $sql .= ' ORDER BY e.date_emprunt DESC, e.id DESC';
+        if ($limite !== null) {
+            $limite = max(1, min($limite, 100));
+            $offset = max(0, $offset);
+            $sql .= ' LIMIT ' . $limite . ' OFFSET ' . $offset;
+        }
         return self::requete($sql, $params)->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public static function tous(): array
     {
         return self::selectEmprunts();
+    }
+
+    public static function compter(bool $retards = false): int
+    {
+        if ($retards) {
+            return (int) self::requete(
+                'SELECT COUNT(*) FROM emprunts
+                 WHERE date_retour IS NULL AND date_emprunt < DATE_SUB(CURDATE(), INTERVAL 14 DAY)'
+            )->fetchColumn();
+        }
+
+        return (int) self::requete('SELECT COUNT(*) FROM emprunts')->fetchColumn();
+    }
+
+    public static function pagines(int $limite, int $offset, bool $retards = false): array
+    {
+        $condition = $retards
+            ? 'e.date_retour IS NULL AND e.date_emprunt < DATE_SUB(CURDATE(), INTERVAL 14 DAY)'
+            : '';
+        return self::selectEmprunts($condition, [], $limite, $offset);
     }
 
     public static function statistiques(): array

@@ -13,8 +13,17 @@ class Adherent
 
     public static function tous(): array
     {
-        return self::requete('SELECT * FROM adherents ORDER BY nom, prenom')
+        return self::requete('SELECT * FROM adherents ORDER BY nom, prenom, id')
             ->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function pagines(int $limite, int $offset): array
+    {
+        $limite = max(1, min($limite, 100));
+        $offset = max(0, $offset);
+        return self::requete(
+            'SELECT * FROM adherents ORDER BY nom, prenom, id LIMIT ' . $limite . ' OFFSET ' . $offset
+        )->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public static function compter(): int

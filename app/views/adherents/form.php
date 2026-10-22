@@ -9,6 +9,7 @@ $action = app_url($modif ? '/adherents/update/' . (int) $adherent['id'] : '/adhe
     <div class="card">
         <div class="card-body p-4">
             <form action="<?= $e($action) ?>" method="post">
+                <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
                 <?php foreach ([
                     'nom' => ['Nom', 'text', true, 100],
                     'prenom' => ['Prénom', 'text', true, 100],

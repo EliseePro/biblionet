@@ -11,7 +11,7 @@ $e = fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
 </div>
 
 <?php if (($terme ?? '') !== ''): ?>
-    <p class="text-muted">Résultats pour « <?= $e($terme) ?> » — <?= count($livres) ?> livre(s)</p>
+    <p class="text-muted">Résultats pour « <?= $e($terme) ?> » — <?= (int) $pagination['total_items'] ?> livre(s)</p>
 <?php endif; ?>
 
 <div class="table-responsive">
@@ -50,3 +50,4 @@ $e = fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
         </tbody>
     </table>
 </div>
+<?php require __DIR__ . '/../layouts/pagination.php'; ?>

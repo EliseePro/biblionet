@@ -15,11 +15,21 @@ class CatalogueController extends Controller
     public function index(): void
     {
         $terme = trim((string) ($_GET['q'] ?? ''));
-        $livres = $terme !== '' ? Livre::search($terme) : Livre::all();
+        $pagination = $this->paginationData(
+            Livre::compter($terme !== '' ? $terme : null),
+            $this->requestedPage()
+        );
         $this->render('catalogue/index', [
             'title'  => 'Catalogue',
-            'livres' => $livres,
+            'livres' => Livre::pagines(
+                $pagination['per_page'],
+                $pagination['offset'],
+                $terme !== '' ? $terme : null
+            ),
             'terme'  => $terme,
+            'pagination' => $pagination,
+            'paginationPath' => '/catalogue',
+            'paginationQuery' => $terme !== '' ? ['q' => $terme] : [],
         ]);
     }
 }

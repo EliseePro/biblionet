@@ -44,6 +44,7 @@ $title = 'Livres';
                             <form action="<?= $e(app_url('/livres/delete/' . (int) $l['id'])) ?>"
                                   method="post" class="d-inline"
                                   onsubmit="return confirm('Supprimer ce livre ?')">
+                                <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
                                 <button type="submit" class="btn btn-sm btn-outline-danger">Supprimer</button>
                             </form>
                         </td>
@@ -53,3 +54,4 @@ $title = 'Livres';
         </table>
     </div>
 <?php endif; ?>
+<?php require __DIR__ . '/../layouts/pagination.php'; ?>

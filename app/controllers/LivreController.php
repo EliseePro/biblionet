@@ -19,7 +19,13 @@ class LivreController extends Controller
 
     public function index(): void
     {
-        $this->render('livres/index', ['livres' => Livre::all()]);
+        $pagination = $this->paginationData(Livre::compter(), $this->requestedPage());
+        $this->render('livres/index', [
+            'livres' => Livre::pagines($pagination['per_page'], $pagination['offset']),
+            'pagination' => $pagination,
+            'paginationPath' => '/livres',
+            'paginationQuery' => [],
+        ]);
     }
 
     public function create(): void
@@ -49,6 +55,7 @@ class LivreController extends Controller
 
     public function delete($id): void
     {
+        $this->requireCsrfToken();
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && Livre::delete((int) $id)) {
             $this->message('success', 'Livre supprimé.');
         } else {
@@ -59,6 +66,7 @@ class LivreController extends Controller
 
     private function enregistrer(?int $id): void
     {
+        $this->requireCsrfToken();
         $livre = $id ? Livre::find($id) : null;
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' || ($id && !$livre)) {
             $this->message('danger', 'Requête invalide.');

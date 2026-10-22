@@ -49,11 +49,13 @@ $title = 'Emprunts';
                                     <form action="<?= $e(app_url('/emprunts/retour/' . (int) $emprunt['id'])) ?>" method="post"
                                           class="d-inline"
                                           onsubmit="return confirm('Confirmer le retour de ce livre ?')">
+                                        <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
                                         <button type="submit" class="btn btn-sm btn-outline-success">Retourner</button>
                                     </form>
                                 <?php endif; ?>
                                 <form action="<?= $e(app_url('/emprunts/delete/' . (int) $emprunt['id'])) ?>" method="post"
                                       class="d-inline" onsubmit="return confirm('Supprimer cet emprunt ?')">
+                                    <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
                                     <button type="submit" class="btn btn-sm btn-outline-danger">Supprimer</button>
                                 </form>
                             </td>
@@ -63,3 +65,4 @@ $title = 'Emprunts';
             </table>
         </div>
     <?php endif; ?>
+<?php require __DIR__ . '/../layouts/pagination.php'; ?>

@@ -27,6 +27,7 @@ $peutEnregistrer = !empty($adherents) && ($modif || $aUnLivreDisponible);
     <div class="card">
         <div class="card-body p-4">
             <form action="<?= $e($action) ?>" method="post">
+                <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
                 <div class="mb-3">
                     <label for="adherent_id" class="form-label">Adhérent</label>
                     <select id="adherent_id" name="adherent_id"

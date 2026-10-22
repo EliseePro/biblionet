@@ -40,6 +40,7 @@ $title = 'Adhérents';
                                    class="btn btn-sm btn-outline-primary">Modifier</a>
                                 <form action="<?= $e(app_url('/adherents/delete/' . (int) $a['id'])) ?>" method="post"
                                       class="d-inline" onsubmit="return confirm('Supprimer cet adhérent ?')">
+                                    <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
                                     <button type="submit" class="btn btn-sm btn-outline-danger">Supprimer</button>
                                 </form>
                             </td>
@@ -49,3 +50,4 @@ $title = 'Adhérents';
             </table>
         </div>
     <?php endif; ?>
+<?php require __DIR__ . '/../layouts/pagination.php'; ?>

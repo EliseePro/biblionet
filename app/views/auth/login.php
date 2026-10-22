@@ -8,6 +8,14 @@ $title = 'Connexion';
             <div class="card-body p-4">
                 <h1 class="h4 mb-4 text-center">Connexion bibliothécaire</h1>
                 <form method="post" action="<?= $e(app_url('/login')) ?>" autocomplete="on">
+                    <input type="hidden" name="csrf_token" value="<?= $e($csrf_token ?? '') ?>">
+
+                    <?php if (isset($errors['csrf'])): ?>
+                        <div class="alert alert-danger" role="alert">
+                            <?= $e($errors['csrf']) ?>
+                        </div>
+                    <?php endif; ?>
+
                     <div class="mb-3">
                         <label class="form-label" for="email">Email</label>
                         <input type="email" name="email" id="email" class="form-control <?= isset($errors['email']) ? 'is-invalid' : '' ?>"

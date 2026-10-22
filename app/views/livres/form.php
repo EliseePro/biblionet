@@ -19,6 +19,7 @@ $champs = [
     <div class="card">
         <div class="card-body p-4">
             <form action="<?= $e($action) ?>" method="post">
+                <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
                 <?php foreach ($champs as $nom => [$label, $type]): ?>
                     <div class="mb-3">
                         <label class="form-label" for="<?= $e($nom) ?>"><?= $e($label) ?></label>

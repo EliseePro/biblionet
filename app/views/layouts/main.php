@@ -56,7 +56,10 @@ $current = trim($requestPath, '/');
                     <span class="navbar-text text-white-50 me-3"><?= $e($_SESSION['user_nom'] ?? '') ?></span>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="<?= $e(app_url('/logout')) ?>">Déconnexion</a>
+                    <form action="<?= $e(app_url('/logout')) ?>" method="post" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
+                        <button type="submit" class="nav-link border-0 bg-transparent">Déconnexion</button>
+                    </form>
                 </li>
                 <?php else: ?>
                 <li class="nav-item">

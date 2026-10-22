@@ -37,7 +37,13 @@ class EmpruntController extends Controller
 
     public function index(): void
     {
-        $this->render('emprunts/index', ['emprunts' => Emprunt::tous()]);
+        $pagination = $this->paginationData(Emprunt::compter(), $this->requestedPage());
+        $this->render('emprunts/index', [
+            'emprunts' => Emprunt::pagines($pagination['per_page'], $pagination['offset']),
+            'pagination' => $pagination,
+            'paginationPath' => '/emprunts',
+            'paginationQuery' => [],
+        ]);
     }
 
     public function create(): void
@@ -59,6 +65,7 @@ class EmpruntController extends Controller
 
     public function enregistrer(?int $id = null): void
     {
+        $this->requireCsrfToken();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->message('danger', 'Requête invalide.');
             $this->redirect('/emprunts');
@@ -127,6 +134,7 @@ class EmpruntController extends Controller
 
     public function supprimer($id): void
     {
+        $this->requireCsrfToken();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->message('danger', 'Requête invalide.');
         } elseif (Emprunt::supprimer((int) $id)) {
@@ -144,6 +152,7 @@ class EmpruntController extends Controller
 
     public function marquerCommeRetourne($id): void
     {
+        $this->requireCsrfToken();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->message('danger', 'Requête invalide.');
         } elseif (Emprunt::marquerCommeRetourne((int) $id)) {
@@ -156,8 +165,13 @@ class EmpruntController extends Controller
 
     public function empruntEnRetard(): void
     {
-        $empruntsEnRetard = Emprunt::empruntsEnRetard();
-        $this->render('emprunts/retards', ['emprunts' => $empruntsEnRetard]);
+        $pagination = $this->paginationData(Emprunt::compter(true), $this->requestedPage());
+        $this->render('emprunts/retards', [
+            'emprunts' => Emprunt::pagines($pagination['per_page'], $pagination['offset'], true),
+            'pagination' => $pagination,
+            'paginationPath' => '/emprunts/retards',
+            'paginationQuery' => [],
+        ]);
     }
 
     public function retards(): void

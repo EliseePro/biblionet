@@ -17,8 +17,38 @@ class Livre
 
     public static function all(): array
     {
-        $sql = 'SELECT l.*, ' . self::DISPONIBLES . ' AS disponibles FROM livres l ORDER BY l.titre';
+        $sql = 'SELECT l.*, ' . self::DISPONIBLES . ' AS disponibles FROM livres l ORDER BY l.titre, l.id';
         return self::requete($sql)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function compter(?string $terme = null): int
+    {
+        if ($terme === null || $terme === '') {
+            return (int) self::requete('SELECT COUNT(*) FROM livres')->fetchColumn();
+        }
+
+        $like = '%' . $terme . '%';
+        return (int) self::requete(
+            'SELECT COUNT(*) FROM livres WHERE titre LIKE ? OR auteur LIKE ?',
+            [$like, $like]
+        )->fetchColumn();
+    }
+
+    public static function pagines(int $limite, int $offset, ?string $terme = null): array
+    {
+        $limite = max(1, min($limite, 100));
+        $offset = max(0, $offset);
+        $sql = 'SELECT l.*, ' . self::DISPONIBLES . ' AS disponibles FROM livres l';
+        $params = [];
+
+        if ($terme !== null && $terme !== '') {
+            $sql .= ' WHERE l.titre LIKE ? OR l.auteur LIKE ?';
+            $like = '%' . $terme . '%';
+            $params = [$like, $like];
+        }
+
+        $sql .= ' ORDER BY l.titre, l.id LIMIT ' . $limite . ' OFFSET ' . $offset;
+        return self::requete($sql, $params)->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public static function statistiques(): array

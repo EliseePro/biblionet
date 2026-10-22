@@ -17,13 +17,27 @@ class AuthController extends Controller
         if (!empty($_SESSION['user_id'])) {
             $this->redirect('/');
         }
-        $this->render('auth/login', ['errors' => [], 'old' => []]);
+        $this->render('auth/login', [
+            'errors' => [],
+            'old' => [],
+            'csrf_token' => $this->csrfToken(),
+        ]);
     }
 
     public function login(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->redirect('/login');
+        }
+
+        if (!$this->validateCsrfToken()) {
+            http_response_code(403);
+            $this->render('auth/login', [
+                'errors' => ['csrf' => 'Jeton de sécurité invalide. Veuillez réessayer.'],
+                'old' => ['email' => trim((string) ($_POST['email'] ?? ''))],
+                'csrf_token' => $this->csrfToken(),
+            ]);
+            return;
         }
 
         $email    = trim((string) ($_POST['email'] ?? ''));
@@ -38,7 +52,11 @@ class AuthController extends Controller
         }
 
         if ($errors !== []) {
-            $this->render('auth/login', ['errors' => $errors, 'old' => ['email' => $email]]);
+            $this->render('auth/login', [
+                'errors' => $errors,
+                'old' => ['email' => $email],
+                'csrf_token' => $this->csrfToken(),
+            ]);
             return;
         }
 
@@ -46,14 +64,17 @@ class AuthController extends Controller
         if ($user === null) {
             $this->render('auth/login', [
                 'errors' => ['email' => 'Identifiants incorrects.'],
-                'old'    => ['email' => $email],
+                'old' => ['email' => $email],
+                'csrf_token' => $this->csrfToken(),
             ]);
             return;
         }
 
+        session_regenerate_id(true);
         $_SESSION['user_id']    = (int) $user['id'];
         $_SESSION['user_nom']   = $user['nom'];
         $_SESSION['user_email'] = $user['email'];
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
         $this->message('success', 'Bienvenue, ' . $user['nom'] . ' !');
         $this->redirect('/dashboard');
@@ -61,6 +82,7 @@ class AuthController extends Controller
 
     public function logout(): void
     {
+        $this->requireCsrfToken();
         $_SESSION = [];
         if (ini_get('session.use_cookies')) {
             $p = session_get_cookie_params();

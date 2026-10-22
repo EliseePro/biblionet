@@ -21,7 +21,13 @@ class AdherentController extends Controller
 
     public function index(): void
     {
-        $this->render('adherents/index', ['adherents' => Adherent::tous()]);
+        $pagination = $this->paginationData(Adherent::compter(), $this->requestedPage());
+        $this->render('adherents/index', [
+            'adherents' => Adherent::pagines($pagination['per_page'], $pagination['offset']),
+            'pagination' => $pagination,
+            'paginationPath' => '/adherents',
+            'paginationQuery' => [],
+        ]);
     }
 
     public function create(): void
@@ -41,6 +47,7 @@ class AdherentController extends Controller
 
     public function enregistrer(?int $id = null): void
     {
+        $this->requireCsrfToken();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->message('danger', 'Requête invalide.');
             $this->redirect('/adherents');
@@ -111,6 +118,7 @@ class AdherentController extends Controller
 
     public function supprimer($id): void
     {
+        $this->requireCsrfToken();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->message('danger', 'Requête invalide.');
         } elseif (Adherent::supprimer((int) $id)) {
