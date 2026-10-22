@@ -25,6 +25,7 @@ $router = new Router();
 
 $router->get('/',              'CatalogueController', 'index');
 $router->get('/catalogue',     'CatalogueController', 'index');
+$router->get('/dashboard',     'DashboardController', 'index');
 
 $router->get('/login',         'AuthController', 'loginForm');
 $router->post('/login',        'AuthController', 'login');
@@ -39,6 +40,7 @@ $router->post('/livres/delete/{id}','LivreController', 'delete');
 
 $router->get('/adherents',             'AdherentController', 'index');
 $router->get('/adherents/create',      'AdherentController', 'create');
+$router->get('/adherents/show/{id}',   'AdherentController', 'recherche');
 $router->post('/adherents/store',      'AdherentController', 'store');
 $router->get('/adherents/edit/{id}',   'AdherentController', 'edit');
 $router->post('/adherents/update/{id}','AdherentController', 'update');

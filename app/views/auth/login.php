@@ -7,7 +7,7 @@ $title = 'Connexion';
         <div class="card shadow-sm">
             <div class="card-body p-4">
                 <h1 class="h4 mb-4 text-center">Connexion bibliothécaire</h1>
-                <form method="post" action="/login" autocomplete="on">
+                <form method="post" action="<?= $e(app_url('/login')) ?>" autocomplete="on">
                     <div class="mb-3">
                         <label class="form-label" for="email">Email</label>
                         <input type="email" name="email" id="email" class="form-control <?= isset($errors['email']) ? 'is-invalid' : '' ?>"

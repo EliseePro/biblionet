@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../config/config.php';
 class Livre
 {
 
-    private const DISPONIBLES = '(l.nb_exemplaires - (SELECT COUNT(*) FROM emprunts e WHERE e.livre_id = l.id AND e.date_retour IS NULL))';
+    private const DISPONIBLES = 'GREATEST(CAST(l.nb_exemplaires AS SIGNED) - (SELECT COUNT(*) FROM emprunts e WHERE e.livre_id = l.id AND e.date_retour IS NULL), 0)';
 
   
     private static function requete(string $sql, array $params = []): PDOStatement
@@ -19,6 +19,15 @@ class Livre
     {
         $sql = 'SELECT l.*, ' . self::DISPONIBLES . ' AS disponibles FROM livres l ORDER BY l.titre';
         return self::requete($sql)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function statistiques(): array
+    {
+        $sql = 'SELECT COUNT(*) AS titres,
+                       COALESCE(SUM(l.nb_exemplaires), 0) AS exemplaires,
+                       COALESCE(SUM(' . self::DISPONIBLES . '), 0) AS disponibles
+                FROM livres l';
+        return self::requete($sql)->fetch(PDO::FETCH_ASSOC);
     }
 
     public static function search(string $terme): array

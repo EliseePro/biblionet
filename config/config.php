@@ -37,6 +37,18 @@ function loadEnv(string $path): void
 $envPath = dirname(__DIR__) . '/.env';
 loadEnv($envPath);
 
+function app_base_path(): string
+{
+    $scriptDirectory = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
+    return $scriptDirectory === '/' || $scriptDirectory === '.' ? '' : rtrim($scriptDirectory, '/');
+}
+
+function app_url(string $path = '/'): string
+{
+    $path = '/' . ltrim($path, '/');
+    return app_base_path() . $path;
+}
+
 function connexion(): PDO
 {
     static $bdd = null;

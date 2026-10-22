@@ -31,6 +31,32 @@ class Emprunt
         return self::selectEmprunts();
     }
 
+    public static function statistiques(): array
+    {
+        return self::requete(
+            'SELECT COUNT(*) AS total,
+                    COALESCE(SUM(date_retour IS NULL), 0) AS en_cours,
+                    COALESCE(SUM(
+                        date_retour IS NULL
+                        AND date_emprunt < DATE_SUB(CURDATE(), INTERVAL 14 DAY)
+                    ), 0) AS en_retard
+             FROM emprunts'
+        )->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public static function recents(int $limite = 5): array
+    {
+        $limite = max(1, min($limite, 10));
+        $sql = 'SELECT e.*, a.nom AS adherent_nom, a.prenom AS adherent_prenom,
+                       l.titre AS livre_titre
+                FROM emprunts e
+                JOIN adherents a ON e.adherent_id = a.id
+                JOIN livres l ON e.livre_id = l.id
+                ORDER BY e.date_emprunt DESC, e.id DESC
+                LIMIT ' . $limite;
+        return self::requete($sql)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public static function trouver(int $id): ?array
     {
         return self::requete(

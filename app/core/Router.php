@@ -53,11 +53,15 @@ class Router
         }
 
         http_response_code(404);
-        echo '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>404</title>'
-           . '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">'
-           . '</head><body class="container py-5"><h1>404 — Page introuvable</h1>'
-           . '<p>URL demandée : <code>' . htmlspecialchars($url) . '</code></p>'
-           . '<a href="/" class="btn btn-primary">Accueil</a></body></html>';
+        $title = 'Page introuvable';
+        $flash = null;
+        $content = '<div class="card"><div class="card-body py-5 text-center">'
+            . '<h1 class="h3">404 — Page introuvable</h1>'
+            . '<p class="text-muted">URL demandée : <code>'
+            . htmlspecialchars($url, ENT_QUOTES, 'UTF-8')
+            . '</code></p><a href="' . htmlspecialchars(app_url('/'), ENT_QUOTES, 'UTF-8')
+            . '" class="btn btn-primary">Retour à l’accueil</a></div></div>';
+        require __DIR__ . '/../views/layouts/main.php';
     }
 
     private function call(string $controllerName, string $action, ?int $id = null): void

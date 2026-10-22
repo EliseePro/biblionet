@@ -1,8 +1,9 @@
 <?php
 
+require_once __DIR__ . '/../core/Controller.php';
 require_once __DIR__ . '/../models/Livre.php';
 
-class LivreController
+class LivreController extends Controller
 {
     private const AUTH_ACTIVE = true;
 
@@ -46,7 +47,6 @@ class LivreController
         $this->enregistrer((int) $id);
     }
 
-    // Suppression (uniquement en POST)
     public function delete($id): void
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && Livre::delete((int) $id)) {
@@ -103,22 +103,4 @@ class LivreController
         return $errors;
     }
 
-    private function render(string $vue, array $data = []): void
-    {
-        extract($data);
-        $flash = $_SESSION['flash'] ?? null;
-        unset($_SESSION['flash']);
-        require __DIR__ . '/../views/' . $vue . '.php';
-    }
-
-    private function message(string $type, string $texte): void
-    {
-        $_SESSION['flash'] = ['type' => $type, 'message' => $texte];
-    }
-
-    private function redirect(string $chemin): void
-    {
-        header('Location: ' . $chemin);
-        exit;
-    }
 }

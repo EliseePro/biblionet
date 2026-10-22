@@ -17,6 +17,11 @@ class Adherent
             ->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public static function compter(): int
+    {
+        return (int) self::requete('SELECT COUNT(*) FROM adherents')->fetchColumn();
+    }
+
     public static function trouver(int $id): ?array
     {
         return self::requete('SELECT * FROM adherents WHERE id = ?', [$id])

@@ -3,7 +3,7 @@ $e = fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
 ?>
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
     <h1 class="h3 mb-0">Catalogue public</h1>
-    <form method="get" action="/catalogue" class="d-flex gap-2" style="max-width: 360px; width: 100%;">
+    <form method="get" action="<?= $e(app_url('/catalogue')) ?>" class="d-flex gap-2" style="max-width: 360px; width: 100%;">
         <input type="search" name="q" class="form-control" placeholder="Titre ou auteur…"
                value="<?= $e($terme ?? '') ?>">
         <button class="btn btn-outline-primary">Rechercher</button>

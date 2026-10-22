@@ -4,6 +4,7 @@
 /** @var array $errors */
 $e = fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
 $modif = !empty($livre);
+$title = ($modif ? 'Modifier' : 'Ajouter') . ' un livre';
 $action = $modif ? '/livres/update/' . (int) $livre['id'] : '/livres/store';
 $champs = [
     'titre'          => ['Titre', 'text'],
@@ -13,6 +14,7 @@ $champs = [
     'nb_exemplaires' => ['Nombre d\'exemplaires', 'number'],
 ];
 ?>
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -50,3 +52,29 @@ $champs = [
 </div>
 </body>
 </html>
+=======
+<div class="page page-form">
+    <h1 class="h3 mb-4"><?= $e($title) ?></h1>
+    <div class="card">
+        <div class="card-body p-4">
+            <form action="<?= $e(app_url($action)) ?>" method="post">
+                <?php foreach ($champs as $nom => [$label, $type]): ?>
+                    <div class="mb-3">
+                        <label class="form-label" for="<?= $e($nom) ?>"><?= $e($label) ?></label>
+                        <input id="<?= $e($nom) ?>" type="<?= $e($type) ?>" name="<?= $e($nom) ?>" class="form-control"
+                               value="<?= $e($old[$nom] ?? '') ?>">
+                        <?php if (isset($errors[$nom])): ?>
+                            <div class="text-danger"><?= $e($errors[$nom]) ?></div>
+                        <?php endif; ?>
+                    </div>
+                <?php endforeach; ?>
+
+                <div class="d-flex gap-2">
+                    <a href="<?= $e(app_url('/livres')) ?>" class="btn btn-outline-secondary">Annuler</a>
+                    <button class="btn btn-primary"><?= $modif ? 'Enregistrer' : 'Ajouter' ?></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+>>>>>>> 13da819 (Réglage des erreurs)

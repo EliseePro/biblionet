@@ -1,9 +1,10 @@
 <?php
 
+require_once __DIR__ . '/../core/Controller.php';
 require_once __DIR__ . '/../models/Adherent.php';
 require_once __DIR__ . '/../models/Emprunt.php';
 
-class AdherentController
+class AdherentController extends Controller
 {
     private const AUTH_ACTIVE = true;
 
@@ -13,28 +14,9 @@ class AdherentController
             session_start();
         }
         if (self::AUTH_ACTIVE && empty($_SESSION['user_id'])) {
-            header('Location: /login');
+            $this->redirect('/login');
             exit;
         }
-    }
-
-    private function redirect(string $path): void
-    {
-        header('Location: ' . (function_exists('app_url') ? app_url($path) : $path));
-        exit;
-    }
-
-    private function render(string $view, array $data = []): void
-    {
-        $flash = $_SESSION['flash'] ?? null;
-        unset($_SESSION['flash']);
-        extract($data);
-        require __DIR__ . '/../views/' . $view . '.php';
-    }
-
-    private function message(string $type, string $text): void
-    {
-        $_SESSION['flash'] = ['type' => $type, 'message' => $text];
     }
 
     public function index(): void

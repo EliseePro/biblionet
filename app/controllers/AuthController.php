@@ -56,7 +56,7 @@ class AuthController extends Controller
         $_SESSION['user_email'] = $user['email'];
 
         $this->message('success', 'Bienvenue, ' . $user['nom'] . ' !');
-        $this->redirect('/livres');
+        $this->redirect('/dashboard');
     }
 
     public function logout(): void
