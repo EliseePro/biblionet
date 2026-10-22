@@ -16,6 +16,7 @@ $current = trim($requestPath, '/');
     <title><?= isset($title) ? $e($title) . ' — ' : '' ?>BiblioNet</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="<?= $e(app_url('/assets/css/style.css')) ?>" rel="stylesheet">
+    <link rel="icon" type="image/png" href="<?= $e(app_url('/img/favicon.png')) ?>">
     <style>
         body { min-height: 100vh; display: flex; flex-direction: column; }
         main { flex: 1; }
@@ -24,9 +25,29 @@ $current = trim($requestPath, '/');
     </style>
 </head>
 <body>
+    <div id="splash">
+    <img src="<?= $e(app_url('/img/logo-256.png')) ?>" alt="Bibliokaedo" class="splash-logo">
+    <div class="splash-barre"><span></span></div>
+</div>
+
+<script>
+    (function () {
+        var s = document.getElementById('splash');
+        if (sessionStorage.getItem('splashVu')) { s.remove(); return; }
+        sessionStorage.setItem('splashVu', '1');
+        window.addEventListener('load', function () {
+            setTimeout(function () {
+                s.classList.add('cache');
+                setTimeout(function () { s.remove(); }, 600);
+            }, 2000);
+        });
+    })();
+</script>
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
     <div class="container">
-        <a class="navbar-brand" href="<?= $e(app_url($logged ? '/dashboard' : '/')) ?>">📚 BiblioNet</a>
+       <a class="navbar-brand" href="<?= $e(app_url($logged ? '/dashboard' : '/')) ?>">
+    <img src="<?= $e(app_url('/assets/img/logo-256.png')) ?>" alt="Bibliokaedo" style="height:40px; border-radius:10px;">
+</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
             <span class="navbar-toggler-icon"></span>
         </button>

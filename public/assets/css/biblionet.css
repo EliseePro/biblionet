@@ -142,3 +142,53 @@ h1, h2, h3 { font-weight: 700; color: var(--texte); }
     .sidebar .bas { margin-top: 0; margin-left: auto; }
     .contenu { padding: 20px 14px; }
 }
+.sidebar .logo img {
+    width: 100%;
+    max-width: 150px;
+    display: block;
+    border-radius: 18px;
+}
+/* ---------- Splash screen ---------- */
+#splash {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: #12384a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    transition: opacity .5s ease, visibility .5s ease;
+}
+#splash.cache { opacity: 0; visibility: hidden; }
+
+.splash-logo {
+    width: 160px;
+    border-radius: 36px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, .35);
+    animation: splash-pulse 1.6s ease-in-out both;
+}
+@keyframes splash-pulse {
+    0%   { transform: scale(.6);   opacity: 0; }
+    35%  { transform: scale(1.15); opacity: 1; }
+    65%  { transform: scale(.95); }
+    100% { transform: scale(1); }
+}
+
+.splash-barre {
+    width: 120px;
+    height: 4px;
+    background: rgba(255, 255, 255, .2);
+    border-radius: 99px;
+    overflow: hidden;
+}
+.splash-barre span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: #e8963a;
+    border-radius: 99px;
+    animation: splash-charge 1.9s ease-out forwards;
+}
+@keyframes splash-charge { to { width: 100%; } }
