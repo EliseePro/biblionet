@@ -7,6 +7,7 @@ $title = 'Emprunts';
         <p class="dashboard-eyebrow mb-1">Gestion de la bibliothèque</p>
         <h1 class="h3 mb-0">Emprunts</h1>
     </div>
+    <a href="<?= $e(app_url('/emprunts/retards')) ?>" class="btn btn-outline-warning">Voir les retards</a>
     <a href="<?= $e(app_url('/emprunts/create')) ?>" class="btn btn-primary">+ Nouvel emprunt</a>
 </div>
 
