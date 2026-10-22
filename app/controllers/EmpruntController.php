@@ -153,4 +153,16 @@ class EmpruntController extends Controller
         }
         $this->redirect('/emprunts');
     }
+
+    public function empruntEnRetard(): void
+    {
+        $empruntsEnRetard = Emprunt::empruntsEnRetard();
+        $this->render('emprunts/retards', ['emprunts' => $empruntsEnRetard]);
+    }
+
+    public function retards(): void
+    {
+        $this->empruntEnRetard();
+    }
+
 }
