@@ -61,9 +61,9 @@ function connexion(): PDO
     $user     = getenv('DB_USER');
     $password = getenv('DB_PASS');
 
-    $host     = ($host === false || $host === '') ? 'localhost' : $host;
-    $database = ($database === false || $database === '') ? 'bibliotheque' : $database;
-    $user     = ($user === false || $user === '') ? 'root' : $user;
+    $host     = ($host === false || $host === '') ? 'sql211.infinityfree.com' : $host;
+    $database = ($database === false || $database === '') ? 'if0_43246115_bibliotheque' : $database;
+    $user     = ($user === false || $user === '') ? 'if0_43246115' : $user;
     $password = ($password === false) ? '' : $password;
 
     $bdd = new PDO(
