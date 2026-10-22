@@ -47,6 +47,7 @@ $router->post('/adherents/update/{id}','AdherentController', 'update');
 $router->post('/adherents/delete/{id}','AdherentController', 'delete');
 
 $router->get('/emprunts',                    'EmpruntController', 'index');
+$router->get('/emprunts/retards',             'EmpruntController', 'retards');
 $router->get('/emprunts/create',             'EmpruntController', 'create');
 $router->post('/emprunts/store',             'EmpruntController', 'store');
 $router->get('/emprunts/edit/{id}',          'EmpruntController', 'edit');
