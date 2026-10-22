@@ -26,11 +26,7 @@ $current = trim($requestPath, '/');
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
     <div class="container">
-<<<<<<< HEAD
-        <a class="navbar-brand" href="/"> BiblioNet</a>
-=======
         <a class="navbar-brand" href="<?= $e(app_url($logged ? '/dashboard' : '/')) ?>">📚 BiblioNet</a>
->>>>>>> 13da819 (Réglage des erreurs)
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
             <span class="navbar-toggler-icon"></span>
         </button>
