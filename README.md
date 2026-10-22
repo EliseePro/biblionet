@@ -34,7 +34,7 @@ Mini-projet pédagogique : architecture **MVC sans framework**, PHP 8, MySQL/Mar
 
 | Email                   | Mot de passe |
 |-------------------------|--------------|
-| admin@biblionet.local   | admin123     |
+| admin@biblionet.local   |admin123      |
 
 Le mot de passe est stocké avec `password_hash` / vérifié avec `password_verify`.
 
