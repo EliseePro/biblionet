@@ -1,4 +1,7 @@
 <?php
+/** @var array|null $livre */
+/** @var array $old */
+/** @var array $errors */
 $e = fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
 $modif = !empty($livre);
 $action = $modif ? '/livres/update/' . (int) $livre['id'] : '/livres/store';
@@ -14,28 +17,36 @@ $champs = [
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= $modif ? 'Modifier' : 'Ajouter' ?> un livre - BiblioNet</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/assets/css/biblionet.css" rel="stylesheet">
 </head>
-<body class="container py-4" style="max-width: 600px;">
+<body>
+<div class="page" style="max-width: 600px;">
 
-    <h1 class="h3 mb-3"><?= $modif ? 'Modifier' : 'Ajouter' ?> un livre</h1>
+    <h1 class="h3 mb-4"><?= $modif ? 'Modifier' : 'Ajouter' ?> un livre</h1>
 
-    <form action="<?= $e($action) ?>" method="post">
-        <?php foreach ($champs as $nom => [$label, $type]): ?>
-            <div class="mb-3">
-                <label class="form-label"><?= $e($label) ?></label>
-                <input type="<?= $type ?>" name="<?= $nom ?>" class="form-control"
-                       value="<?= $e($old[$nom] ?? '') ?>">
-                <?php if (isset($errors[$nom])): ?>
-                    <div class="text-danger"><?= $e($errors[$nom]) ?></div>
-                <?php endif; ?>
+    <div class="carte">
+        <form action="<?= $e($action) ?>" method="post">
+            <?php foreach ($champs as $nom => [$label, $type]): ?>
+                <div class="mb-3">
+                    <label class="form-label"><?= $e($label) ?></label>
+                    <input type="<?= $type ?>" name="<?= $nom ?>" class="form-control"
+                           value="<?= $e($old[$nom] ?? '') ?>">
+                    <?php if (isset($errors[$nom])): ?>
+                        <div class="text-danger small mt-1"><?= $e($errors[$nom]) ?></div>
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; ?>
+
+            <div class="d-flex justify-content-between">
+                <a href="/livres" class="btn btn-outline-secondary">Annuler</a>
+                <button class="btn btn-primary"><?= $modif ? 'Enregistrer' : 'Ajouter' ?></button>
             </div>
-        <?php endforeach; ?>
+        </form>
+    </div>
 
-        <a href="/livres" class="btn btn-outline-secondary">Annuler</a>
-        <button class="btn btn-primary"><?= $modif ? 'Enregistrer' : 'Ajouter' ?></button>
-    </form>
-
+</div>
 </body>
 </html>
